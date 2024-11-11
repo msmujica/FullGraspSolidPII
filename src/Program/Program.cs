@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Full_GRASP_And_SOLID
 {
@@ -19,18 +20,26 @@ namespace Full_GRASP_And_SOLID
         public static void Main(string[] args)
         {
             PopulateCatalogs();
-
+            
             Recipe recipe = new Recipe();
+
+            // Set the FinalProduct before printing
             recipe.FinalProduct = GetProduct("Café con leche");
+
             recipe.AddStep(GetProduct("Café"), 100, GetEquipment("Cafetera"), 120);
             recipe.AddStep(GetProduct("Leche"), 200, GetEquipment("Hervidor"), 60);
             recipe.AddStep("Dejar enfriar", 60);
 
             IPrinter printer;
             printer = new ConsolePrinter();
-            printer.PrintRecipe(recipe);
+            printer.PrintRecipe(recipe);  // Now this should work
             printer = new FilePrinter();
             printer.PrintRecipe(recipe);
+    
+            Console.WriteLine($"Cooked: {recipe.cooked}");
+            recipe.Cook();
+            Thread.Sleep(500); // 0.5 seconds
+            Console.WriteLine($"Cooked: {recipe.cooked}");
         }
 
         private static void PopulateCatalogs()
@@ -38,7 +47,6 @@ namespace Full_GRASP_And_SOLID
             AddProductToCatalog("Café", 100);
             AddProductToCatalog("Leche", 200);
             AddProductToCatalog("Café con leche", 300);
-
             AddEquipmentToCatalog("Cafetera", 1000);
             AddEquipmentToCatalog("Hervidor", 2000);
         }
@@ -71,8 +79,11 @@ namespace Full_GRASP_And_SOLID
 
         private static Equipment GetEquipment(string description)
         {
-            var query = from Equipment equipment in equipmentCatalog where equipment.Description == description select equipment;
+            var query = from Equipment equipment in equipmentCatalog
+                where equipment.Description == description
+                select equipment;
             return query.FirstOrDefault();
+            
         }
     }
 }
